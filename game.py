@@ -1,4 +1,5 @@
 import pygame as pg
+import math
 
 WIDTH = 600
 HEIGHT = 600
@@ -29,8 +30,8 @@ mouseIsDown = pg.mouse.get_pressed()[0] == 1
 
 pg.display.set_caption("PHCGolf")
 
-def renderText(content,posX,posY):
-    font = pg.font.Font("./assets/fonts/Montserrat-Regular.ttf",20)
+def renderText(content,posX,posY,fontSize=20):
+    font = pg.font.Font("./assets/fonts/Montserrat-Regular.ttf",fontSize)
     text = font.render(content,True,[255,255,255])
     textRect = text.get_rect()
     textRect.center = (posX,posY)
@@ -51,6 +52,8 @@ class Ball:
     def update(self):
         self.x+=self.vx
         self.y+=self.vy
+        self.vx/=1.05
+        self.vy/=1.05
 
 class Hole:
     def __init__(self,x,y,r,color):
@@ -131,13 +134,16 @@ class GameScreen:
         self.playBtn = Button(WIDTH/2,HEIGHT/2,100,25,Color.blue,Color.yellow,Color.white,Color.grey,"Start Game!","levels")
         self.backBtn = Button(100,HEIGHT/4,50,25,Color.blue,Color.yellow,Color.white,Color.grey,"Back","home")
         self.lvlNumBtns = []
+        self.blocks = []
         for i in range(1,6):
             self.lvlNumBtns.append(Button(i*100,(HEIGHT/2),30,30,Color.blue,Color.yellow,Color.white,Color.grey,str(i),"level"+str(i)))
         for i in range(6,11):
             self.lvlNumBtns.append(Button((i-5)*100,(HEIGHT/2)+100,30,30,Color.blue,Color.yellow,Color.white,Color.grey,str(i),"level"+str(i)))
         self.player = Ball(50,HEIGHT/2,10,Color.white)
+        self.hole = Hole(550,250,15,Color.black)
     def showHome(self):
         pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
+        renderText("PHCGolf",WIDTH/2,HEIGHT/4,fontSize=40)
         self.playBtn.show()
     def showLevelScreen(self):
         pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
@@ -146,9 +152,53 @@ class GameScreen:
         for btn in self.lvlNumBtns:
             btn.show()
     def showLevel1(self):
+        self.blocks = [
+            Block(200,100,75,75,Color.orange),
+            Block(300,400,75,75,Color.orange)
+        ]
+        global running
         pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
+        self.hole.show()
+        self.hole.update()
+        for block in self.blocks:
+            block.show()
+            block.update()
         self.player.show()
         self.player.update()
+        if mouseIsDown:
+            pg.draw.line(frame,Color.red,(self.player.x,self.player.y),(mouseX,mouseY))
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+            elif event.type == pg.MOUSEBUTTONUP:
+                distance = 0.05*math.sqrt((mouseX-self.player.x)**2+(mouseY-self.player.y)**2)
+                angle = math.atan2(self.player.y-mouseY,self.player.x-mouseX)
+                self.player.vx = distance*math.cos(angle)
+                self.player.vy = distance*math.sin(angle)
+    def showLevel2(self):
+        self.blocks = [
+            Block(200,100,75,75,Color.orange),
+            Block(300,400,75,75,Color.orange)
+        ]
+        global running
+        pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
+        self.hole.show()
+        self.hole.update()
+        for block in self.blocks:
+            block.show()
+            block.update()
+        self.player.show()
+        self.player.update()
+        if mouseIsDown:
+            pg.draw.line(frame,Color.red,(self.player.x,self.player.y),(mouseX,mouseY))
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+            elif event.type == pg.MOUSEBUTTONUP:
+                distance = 0.05*math.sqrt((mouseX-self.player.x)**2+(mouseY-self.player.y)**2)
+                angle = math.atan2(self.player.y-mouseY,self.player.x-mouseX)
+                self.player.vx = distance*math.cos(angle)
+                self.player.vy = distance*math.sin(angle)
 
 gameScreen = GameScreen()
 
@@ -163,7 +213,7 @@ while running:
         gameScreen.showHome()
     if (currentScreen=="levels"):
         gameScreen.showLevelScreen()
-    if (currentScreen=="level1"):
+    if (currentScreen=="level2"):
         gameScreen.showLevel1()
     for event in pg.event.get():
         if event.type == pg.QUIT:
