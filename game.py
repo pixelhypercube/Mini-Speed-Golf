@@ -54,6 +54,11 @@ class Ball:
         self.y+=self.vy
         self.vx/=1.05
         self.vy/=1.05
+    def detectHole(self,hole):
+        distance = math.sqrt((self.x-hole.x)**2+(self.y-hole.y)**2)
+        if (distance<hole.r):
+            return True
+            # print("IN HOLE!")
 
 class Hole:
     def __init__(self,x,y,r,color):
@@ -106,6 +111,9 @@ class Button:
         global currentScreen
         self.currentColor = self.clickedColor
         currentScreen = self.screen
+        for i in range(1,11):
+            if (self.screen=="level"+str(i)):
+                gameScreen.setLevel(i)
     def setVisibility(self,visible):
         self.visible = visible
     def show(self):
@@ -141,6 +149,7 @@ class GameScreen:
             self.lvlNumBtns.append(Button((i-5)*100,(HEIGHT/2)+100,30,30,Color.blue,Color.yellow,Color.white,Color.grey,str(i),"level"+str(i)))
         self.player = Ball(50,HEIGHT/2,10,Color.white)
         self.hole = Hole(550,250,15,Color.black)
+        self.shots = 0
     def showHome(self):
         pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
         renderText("PHCGolf",WIDTH/2,HEIGHT/4,fontSize=40)
@@ -151,12 +160,80 @@ class GameScreen:
         self.backBtn.show()
         for btn in self.lvlNumBtns:
             btn.show()
-    def showLevel1(self):
-        self.blocks = [
-            Block(200,100,75,75,Color.orange),
-            Block(300,400,75,75,Color.orange)
-        ]
+    def setLevel(self,num):
+        if num==1:
+            self.blocks = [
+                Block(200,100,75,75,Color.orange),
+                Block(300,400,75,75,Color.orange)
+            ]
+            self.player = Ball(50,HEIGHT/2,10,Color.white)
+            self.hole = Hole(550,250,15,Color.black)
+        elif num==2:
+            self.blocks = [
+                Block(200,100,75,75,Color.orange),
+                Block(300,400,75,75,Color.orange)
+            ]
+            self.player = Ball(50,HEIGHT/2,10,Color.white)
+            self.hole = Hole(550,250,15,Color.black)
+        elif num==3:
+            self.blocks = [
+                Block(200,100,75,75,Color.orange),
+                Block(300,400,75,75,Color.orange)
+            ]
+            self.player = Ball(50,HEIGHT/2,10,Color.white)
+            self.hole = Hole(550,250,15,Color.black)
+        elif num==4:
+            self.blocks = [
+                Block(200,100,75,75,Color.orange),
+                Block(300,400,75,75,Color.orange)
+            ]
+            self.player = Ball(50,HEIGHT/2,10,Color.white)
+            self.hole = Hole(550,250,15,Color.black)
+        elif num==5:
+            self.blocks = [
+                Block(200,100,75,75,Color.orange),
+                Block(300,400,75,75,Color.orange)
+            ]
+            self.player = Ball(50,HEIGHT/2,10,Color.white)
+            self.hole = Hole(550,250,15,Color.black)
+        elif num==6:
+            self.blocks = [
+                Block(200,100,75,75,Color.orange),
+                Block(300,400,75,75,Color.orange)
+            ]
+            self.player = Ball(50,HEIGHT/2,10,Color.white)
+            self.hole = Hole(550,250,15,Color.black)
+        elif num==7:
+            self.blocks = [
+                Block(200,100,75,75,Color.orange),
+                Block(300,400,75,75,Color.orange)
+            ]
+            self.player = Ball(50,HEIGHT/2,10,Color.white)
+            self.hole = Hole(550,250,15,Color.black)
+        elif num==8:
+            self.blocks = [
+                Block(200,100,75,75,Color.orange),
+                Block(300,400,75,75,Color.orange)
+            ]
+            self.player = Ball(50,HEIGHT/2,10,Color.white)
+            self.hole = Hole(550,250,15,Color.black)
+        elif num==9:
+            self.blocks = [
+                Block(200,100,75,75,Color.orange),
+                Block(300,400,75,75,Color.orange)
+            ]
+            self.player = Ball(50,HEIGHT/2,10,Color.white)
+            self.hole = Hole(550,250,15,Color.black)
+        elif num==10:
+            self.blocks = [
+                Block(200,100,75,75,Color.orange),
+                Block(300,400,75,75,Color.orange)
+            ]
+            self.player = Ball(50,HEIGHT/2,10,Color.white)
+            self.hole = Hole(550,250,15,Color.black)
+    def showLevel(self):
         global running
+        global currentScreen
         pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
         self.hole.show()
         self.hole.update()
@@ -165,6 +242,9 @@ class GameScreen:
             block.update()
         self.player.show()
         self.player.update()
+        if (self.player.detectHole(self.hole)):
+            print("Scored!")
+            currentScreen = "scored"
         if mouseIsDown:
             pg.draw.line(frame,Color.red,(self.player.x,self.player.y),(mouseX,mouseY))
         for event in pg.event.get():
@@ -175,30 +255,9 @@ class GameScreen:
                 angle = math.atan2(self.player.y-mouseY,self.player.x-mouseX)
                 self.player.vx = distance*math.cos(angle)
                 self.player.vy = distance*math.sin(angle)
-    def showLevel2(self):
-        self.blocks = [
-            Block(200,100,75,75,Color.orange),
-            Block(300,400,75,75,Color.orange)
-        ]
-        global running
-        pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
-        self.hole.show()
-        self.hole.update()
-        for block in self.blocks:
-            block.show()
-            block.update()
-        self.player.show()
-        self.player.update()
-        if mouseIsDown:
-            pg.draw.line(frame,Color.red,(self.player.x,self.player.y),(mouseX,mouseY))
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                running = False
-            elif event.type == pg.MOUSEBUTTONUP:
-                distance = 0.05*math.sqrt((mouseX-self.player.x)**2+(mouseY-self.player.y)**2)
-                angle = math.atan2(self.player.y-mouseY,self.player.x-mouseX)
-                self.player.vx = distance*math.cos(angle)
-                self.player.vy = distance*math.sin(angle)
+    def showScored(self):
+        pg.draw.rect(frame,Color.black,(0,0,WIDTH,HEIGHT))
+        renderText("SCORED!!!",WIDTH/2,HEIGHT/2,fontSize=40)
 
 gameScreen = GameScreen()
 
@@ -213,8 +272,11 @@ while running:
         gameScreen.showHome()
     if (currentScreen=="levels"):
         gameScreen.showLevelScreen()
-    if (currentScreen=="level2"):
-        gameScreen.showLevel1()
+    if (currentScreen=="scored"):
+        gameScreen.showScored()
+    for i in range(1,11):
+        if (currentScreen=="level"+str(i)):
+            gameScreen.showLevel()
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
