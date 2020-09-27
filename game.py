@@ -52,8 +52,24 @@ class Ball:
     def update(self):
         self.x+=self.vx
         self.y+=self.vy
+        if self.x-self.r<=0 or self.x+self.r>=WIDTH:
+            self.vx = -self.vx
+        if self.y-self.r<=0 or self.y+self.r>=HEIGHT:
+            self.vy = -self.vy
         self.vx/=1.05
         self.vy/=1.05
+    def contactBlock(self,block):
+        if (self.x+self.r+self.vx>block.x
+        and self.x-self.r+self.vx<block.x+block.w
+        and self.y+self.r>block.y
+        and self.y<block.y+block.h):
+            self.vx *= -1
+        if (self.x+self.r>block.x
+        and self.x<block.x+block.w
+        and self.y+self.r+self.vy>block.y
+        and self.y-self.r+self.vy<block.y+block.h):
+            self.vy *= -1
+            print("Contact!")
     def detectHole(self,hole):
         distance = math.sqrt((self.x-hole.x)**2+(self.y-hole.y)**2)
         if (distance<hole.r):
@@ -149,10 +165,13 @@ class GameScreen:
             self.lvlNumBtns.append(Button((i-5)*100,(HEIGHT/2)+100,30,30,Color.blue,Color.yellow,Color.white,Color.grey,str(i),"level"+str(i)))
         self.player = Ball(50,HEIGHT/2,10,Color.white)
         self.hole = Hole(550,250,15,Color.black)
-        self.shots = 0
+        self.strokes = 0
+        self.par = 0
+        self.currentLevel = 0
     def showHome(self):
         pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
         renderText("PHCGolf",WIDTH/2,HEIGHT/4,fontSize=40)
+        renderText("By PixelHyperCube!",WIDTH/2,HEIGHT/3,fontSize=30)
         self.playBtn.show()
     def showLevelScreen(self):
         pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
@@ -161,13 +180,15 @@ class GameScreen:
         for btn in self.lvlNumBtns:
             btn.show()
     def setLevel(self,num):
+        self.strokes = 0
         if num==1:
             self.blocks = [
                 Block(200,100,75,75,Color.orange),
                 Block(300,400,75,75,Color.orange)
             ]
-            self.player = Ball(50,HEIGHT/2,10,Color.white)
+            self.player = Ball(100,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.par = 3
         elif num==2:
             self.blocks = [
                 Block(200,100,75,75,Color.orange),
@@ -175,6 +196,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.par = 3
         elif num==3:
             self.blocks = [
                 Block(200,100,75,75,Color.orange),
@@ -182,6 +204,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.par = 3
         elif num==4:
             self.blocks = [
                 Block(200,100,75,75,Color.orange),
@@ -189,6 +212,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.par = 3
         elif num==5:
             self.blocks = [
                 Block(200,100,75,75,Color.orange),
@@ -196,6 +220,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.par = 3
         elif num==6:
             self.blocks = [
                 Block(200,100,75,75,Color.orange),
@@ -203,6 +228,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.par = 3
         elif num==7:
             self.blocks = [
                 Block(200,100,75,75,Color.orange),
@@ -210,6 +236,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.par = 3
         elif num==8:
             self.blocks = [
                 Block(200,100,75,75,Color.orange),
@@ -217,6 +244,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.par = 3
         elif num==9:
             self.blocks = [
                 Block(200,100,75,75,Color.orange),
@@ -224,6 +252,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.par = 3
         elif num==10:
             self.blocks = [
                 Block(200,100,75,75,Color.orange),
@@ -231,6 +260,8 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.par = 3
+        self.currentLevel = num
     def showLevel(self):
         global running
         global currentScreen
@@ -240,6 +271,8 @@ class GameScreen:
         for block in self.blocks:
             block.show()
             block.update()
+            if (self.player.contactBlock(block)):
+                print(True)
         self.player.show()
         self.player.update()
         if (self.player.detectHole(self.hole)):
@@ -247,17 +280,22 @@ class GameScreen:
             currentScreen = "scored"
         if mouseIsDown:
             pg.draw.line(frame,Color.red,(self.player.x,self.player.y),(mouseX,mouseY))
+        renderText("Par "+str(self.par),WIDTH-70,30,fontSize=30)
+        renderText("Strokes: "+str(self.strokes),WIDTH-100,80,fontSize=30)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
             elif event.type == pg.MOUSEBUTTONUP:
+                self.strokes+=1
                 distance = 0.05*math.sqrt((mouseX-self.player.x)**2+(mouseY-self.player.y)**2)
                 angle = math.atan2(self.player.y-mouseY,self.player.x-mouseX)
                 self.player.vx = distance*math.cos(angle)
                 self.player.vy = distance*math.sin(angle)
     def showScored(self):
-        pg.draw.rect(frame,Color.black,(0,0,WIDTH,HEIGHT))
+        pg.draw.rect(frame,Color.blue,(0,0,WIDTH,HEIGHT))
         renderText("SCORED!!!",WIDTH/2,HEIGHT/2,fontSize=40)
+        Button(WIDTH/2,HEIGHT/1.6,100,30,Color.orange,Color.yellow,Color.green,Color.white,"Next Level!","level"+str(self.currentLevel+1)).show()
+        Button(WIDTH/2,HEIGHT/1.3,100,30,Color.orange,Color.yellow,Color.green,Color.white,"Go back!","levels").show()
 
 gameScreen = GameScreen()
 
