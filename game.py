@@ -39,6 +39,19 @@ def renderText(content,posX,posY,fontSize=20):
 
 
 # Classes
+
+class ForceArea:
+    def __init__(self,x,y,w,h,strength,direction,shadeColor):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.strength = strength
+        self.direction = direction
+        self.shadeColor = shadeColor
+    def show(self):
+        pg.draw.rect(frame,self.shadeColor,(self.x,self.y,self.w,self.h))
+
 class Ball:
     def __init__(self,x,y,r,color):
         self.x = x
@@ -69,7 +82,18 @@ class Ball:
         and self.y+self.r+self.vy>block.y
         and self.y-self.r+self.vy<block.y+block.h):
             self.vy *= -1
-            print("Contact!")
+            # print("Contact!")
+    def contactForceArea(self,forceArea):
+        if (self.x+self.r>forceArea.x and self.x-self.r<forceArea.x+forceArea.w and self.y+self.r>forceArea.y and self.y-self.r<forceArea.y+forceArea.h):
+            # print("Force area")
+            if forceArea.direction=="left":
+                self.vx-=forceArea.strength
+            if forceArea.direction=="right":
+                self.vx+=forceArea.strength
+            if forceArea.direction=="up":
+                self.vy-=forceArea.strength
+            if forceArea.direction=="down":
+                self.vy+=forceArea.strength
     def detectHole(self,hole):
         distance = math.sqrt((self.x-hole.x)**2+(self.y-hole.y)**2)
         if (distance<hole.r):
@@ -159,6 +183,7 @@ class GameScreen:
         self.backBtn = Button(100,HEIGHT/4,50,25,Color.blue,Color.orange,Color.white,Color.grey,"Back","home")
         self.lvlNumBtns = []
         self.blocks = []
+        self.forceAreas = []
         for i in range(1,6):
             self.lvlNumBtns.append(Button(i*100,(HEIGHT/2),30,30,Color.blue,Color.orange,Color.white,Color.grey,str(i),"level"+str(i)))
         for i in range(6,11):
@@ -188,6 +213,7 @@ class GameScreen:
             ]
             self.player = Ball(100,HEIGHT/2,5,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.forceAreas = []
             self.par = 3
         elif num==2:
             self.blocks = [
@@ -218,6 +244,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT-75,5,Color.white)
             self.hole = Hole(525,50,15,Color.black)
+            self.forceAreas = []
             self.par = 4
         elif num==3:
             self.blocks = [
@@ -232,6 +259,7 @@ class GameScreen:
             ]
             self.player = Ball(125,HEIGHT-150,5,Color.white)
             self.hole = Hole(WIDTH/2,HEIGHT/2,15,Color.black)
+            self.forceAreas = []
             self.par = 6
         elif num==4:
             self.blocks = [
@@ -242,6 +270,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,5,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.forceAreas = []
             self.par = 3
         elif num==5:
             self.blocks = [
@@ -253,6 +282,9 @@ class GameScreen:
             ]
             self.player = Ball(50,175,5,Color.white)
             self.hole = Hole(50,375,15,Color.black)
+            self.forceAreas = [
+                ForceArea(200,325,100,75,0.1,"right",Color.purple)
+            ]
             self.par = 3
         elif num==6:
             self.blocks = [
@@ -261,6 +293,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.forceAreas = []
             self.par = 3
         elif num==7:
             self.blocks = [
@@ -274,6 +307,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/1.1,10,Color.white)
             self.hole = Hole(550,50,15,Color.black)
+            self.forceAreas = []
             self.par = 3
         elif num==8:
             self.blocks = [
@@ -300,6 +334,7 @@ class GameScreen:
             ]
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.forceAreas = []
             self.par = 3
         elif num==9:
             # self.blocks = [
@@ -309,6 +344,7 @@ class GameScreen:
             self.blocks = []
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.forceAreas = []
             self.par = 3
         elif num==10:
             # self.blocks = [
@@ -318,6 +354,7 @@ class GameScreen:
             self.blocks = []
             self.player = Ball(50,HEIGHT/2,10,Color.white)
             self.hole = Hole(550,250,15,Color.black)
+            self.forceAreas = []
             self.par = 3
         self.currentLevel = num
     def showLevel(self):
@@ -329,8 +366,12 @@ class GameScreen:
         for block in self.blocks:
             block.show()
             block.update()
-            if (self.player.contactBlock(block)):
-                print(True)
+            self.player.contactBlock(block)
+            # if (self.player.contactBlock(block)):
+            #     print(True)
+        for forceArea in self.forceAreas:
+            forceArea.show()
+            self.player.contactForceArea(forceArea)
         self.player.show()
         self.player.update()
         if (self.player.detectHole(self.hole)):
