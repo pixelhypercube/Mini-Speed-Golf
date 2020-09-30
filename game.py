@@ -19,8 +19,7 @@ class Color:
     blue = (0,50,255)
     purple = (150,30,255)
     black = (0,0,0)
-    transparent_blue = (0,125,255,0.5)
-    transparent_white = (255,255,255,0.5)
+    light_blue = (0,125,255)
 
 # The game
 pg.init()
@@ -98,6 +97,14 @@ class Ball:
                 self.y = HEIGHT-10-self.r
         self.vx/=1.05
         self.vy/=1.05
+    def contactBall(self,ball):
+        distance = math.sqrt((self.x-ball.x)**2+(self.y-ball.y)**2)
+        if (distance<ball.r+self.r):
+            angle = math.atan2(self.y-ball.y,self.x-ball.x)
+            self.vx += math.cos(angle)*0.5
+            self.vy += math.sin(angle)*0.5
+            ball.vx -= math.cos(angle)*0.5
+            ball.vy -= math.sin(angle)*0.5
     def contactBlock(self,block):
         if (self.x+self.r+self.vx>block.x
         and self.x-self.r+self.vx<block.x+block.w
@@ -204,6 +211,7 @@ class Button:
     def show(self):
         self.setVisibility(True)
         if self.visible==True:
+            pg.draw.rect(frame,Color.black,(self.x-self.w-3,self.y-self.h-3,self.w*2+6,self.h*2+6))
             pg.draw.rect(frame,self.currentColor,(self.x-self.w,self.y-self.h,self.w*2,self.h*2))
             renderText(self.content,self.x,self.y)
             if (mouseX>=self.x-self.w and mouseX<=self.x+self.w
@@ -225,7 +233,7 @@ class Button:
 class GameScreen:
     def __init__(self):
         self.playBtn = Button(WIDTH/2,HEIGHT/2,100,25,Color.blue,Color.orange,Color.white,Color.grey,"Start Game!","levels")
-        self.backBtn = Button(100,HEIGHT/4,50,25,Color.blue,Color.orange,Color.white,Color.grey,"Back","home")
+        self.backBtn = Button(80,HEIGHT/5,50,25,Color.blue,Color.orange,Color.white,Color.grey,"Back","home")
         self.lvlNumBtns = []
         self.blocks = []
         self.wallBlocks = [
@@ -235,6 +243,7 @@ class GameScreen:
             Block(WIDTH-10,0,10,HEIGHT,Color.grey),
         ]
         self.forceAreas = []
+        self.balls = []
         for i in range(1,6):
             self.lvlNumBtns.append(Button(i*100,(HEIGHT/2),30,30,Color.blue,Color.orange,Color.white,Color.grey,str(i),"level"+str(i)))
         for i in range(6,11):
@@ -249,17 +258,22 @@ class GameScreen:
     def showHome(self):
         pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
         renderText("PHCGolf",WIDTH/2,HEIGHT/4,fontSize=40)
-        renderText("By PixelHyperCube!",WIDTH/2,HEIGHT/3,fontSize=30)
+        renderText("By PixelHyperCube!",WIDTH/2,HEIGHT/3,fontSize=24)
+        renderText("Made using pygame!",WIDTH/2,HEIGHT/2.6,fontSize=15)
         self.playBtn.show()
     def showLevelScreen(self):
         pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
-        renderText("Choose a level!",WIDTH/2,HEIGHT/4)
+        renderText("Choose a level!",WIDTH/2,HEIGHT/5,fontSize=40)
+        renderText("Left-click the mouse and drag to adjust strength",WIDTH/2,180,fontSize=15)
+        renderText("Then release it to hit the ball!",WIDTH/2,200,fontSize=15)
+        renderText("Press 'Esc' or 'P' to pause",WIDTH/2,220,fontSize=15)
         self.backBtn.show()
         for btn in self.lvlNumBtns:
             btn.show()
     def setLevel(self,num):
         self.paused = False
         self.strokes = 0
+        self.balls = []
         if num==1:
             self.blocks = [
                 Block(200,100,75,75,Color.orange),
@@ -270,8 +284,9 @@ class GameScreen:
             self.forceAreas = []
             self.par = 3
             self.lvlTxt = [
-                ["Hold the mouse and drag to adjust strength",WIDTH/2,250,20],
-                ["Then release it to hit the ball!",WIDTH/2,300,20]
+                ["Left-click the mouse and drag to adjust strength",WIDTH/2,225,20],
+                ["Then release it to hit the ball!",WIDTH/2,275,20],
+                ["Press 'Esc' or 'P' to pause",WIDTH/2,325,20],
             ]
         elif num==2:
             self.blocks = [
@@ -305,7 +320,7 @@ class GameScreen:
             self.forceAreas = []
             self.par = 5
             self.lvlTxt = [
-                ["Climb up the blocks",150,100,20]
+                ["Climb up the blocks",150,150,20]
             ]
         elif num==3:
             self.blocks = [
@@ -335,7 +350,7 @@ class GameScreen:
             self.player = Ball(50,HEIGHT/2,7,Color.white)
             self.hole = Hole(550,250,15,Color.black)
             self.forceAreas = [
-                ForceArea(175,175,225,225,0.1,"radial",Color.transparent_blue)
+                ForceArea(175,175,225,225,0.1,"radial",Color.light_blue)
             ]
             self.par = 4
             self.lvlTxt = [
@@ -356,9 +371,16 @@ class GameScreen:
             ]
             self.par = 5
             self.lvlTxt = [
-                ["Goin' around",WIDTH/2,100,20]
+                ["Goin' around",WIDTH/2,50,20]
             ]
         elif num==6:
+            self.balls = [
+                Ball(210,100,20,Color.red),
+                Ball(200,340,10,Color.yellow),
+                Ball(360,250,15,Color.green),
+                Ball(310,220,14,Color.blue),
+                Ball(230,340,12,Color.orange)
+            ]
             self.blocks = [
                 Block(100,0,WIDTH-200,25,Color.orange),
                 Block(100,HEIGHT-25,WIDTH-200,25,Color.orange)
@@ -385,9 +407,9 @@ class GameScreen:
             self.player = Ball(50,HEIGHT/1.1,7,Color.white)
             self.hole = Hole(550,50,15,Color.black)
             self.forceAreas = []
-            self.par = 3
+            self.par = 4
             self.lvlTxt = [
-                ["Left click to shot, drag it to adjust the strength, 'Esc' to pause",100,100,20]
+                ["Choose a path!",WIDTH/2,HEIGHT/2-50,20]
             ]
         elif num==8:
             self.blocks = [
@@ -417,7 +439,7 @@ class GameScreen:
             self.forceAreas = []
             self.par = 3
             self.lvlTxt = [
-                ["That's pretty random...",WIDTH/2,50,20]
+                ["That's pretty random, isn't it?",WIDTH/2,50,20]
             ]
         elif num==9:
             # self.blocks = [
@@ -428,14 +450,14 @@ class GameScreen:
             self.player = Ball(25,25,7,Color.white)
             self.hole = Hole(40,HEIGHT-50,20,Color.black)
             self.forceAreas = [
-                ForceArea(75,0,WIDTH-75,75,0.1,"right",Color.transparent_blue),
-                ForceArea(WIDTH-75,0,75,HEIGHT,0.1,"down",Color.transparent_blue),
-                ForceArea(75,HEIGHT-75,WIDTH-75,75,0.1,"left",Color.transparent_blue),
-                # ForceArea(75,0,WIDTH-75,75,0.1,"right",Color.transparent_blue),
+                ForceArea(75,0,WIDTH-75,75,0.1,"right",Color.light_blue),
+                ForceArea(WIDTH-75,0,75,HEIGHT,0.1,"down",Color.light_blue),
+                ForceArea(75,HEIGHT-75,WIDTH-75,75,0.1,"left",Color.light_blue),
+                # ForceArea(75,0,WIDTH-75,75,0.1,"right",Color.light_blue),
             ]
             self.par = 3
             self.lvlTxt = [
-                ["On the 'conveyor belt'...",WIDTH/2,HEIGHT/2,20]
+                ["Go on the 'conveyor belt'...",WIDTH/2,HEIGHT/2,20]
             ]
         elif num==10:
             # self.blocks = [
@@ -447,8 +469,65 @@ class GameScreen:
             self.hole = Hole(550,250,15,Color.black)
             self.forceAreas = []
             self.par = 3
+            self.balls = [
+                Ball(100,100,10,Color.yellow),
+                Ball(120,100,10,Color.yellow),
+                Ball(140,100,10,Color.yellow),
+                Ball(120,120,10,Color.yellow),
+                Ball(120,140,10,Color.yellow),
+                Ball(120,160,10,Color.yellow),
+
+                Ball(180,100,10,Color.yellow),
+                Ball(180,120,10,Color.yellow),
+                Ball(180,140,10,Color.yellow),
+                Ball(180,160,10,Color.yellow),
+                Ball(200,120,10,Color.yellow),
+                Ball(220,100,10,Color.yellow),
+                Ball(220,120,10,Color.yellow),
+                Ball(220,140,10,Color.yellow),
+                Ball(220,160,10,Color.yellow),
+
+                Ball(260,100,10,Color.yellow),
+                Ball(260,120,10,Color.yellow),
+                Ball(260,140,10,Color.yellow),
+                Ball(260,160,10,Color.yellow),
+                Ball(280,100,10,Color.yellow),
+                Ball(280,140,10,Color.yellow),
+                Ball(300,100,10,Color.yellow),
+                Ball(300,120,10,Color.yellow),
+                Ball(300,140,10,Color.yellow),
+                Ball(300,160,10,Color.yellow),
+                
+                Ball(340,100,10,Color.yellow),
+                Ball(340,120,10,Color.yellow),
+                Ball(340,140,10,Color.yellow),
+                Ball(340,160,10,Color.yellow),
+                Ball(360,100,10,Color.yellow),
+                Ball(380,120,10,Color.yellow),
+                Ball(380,140,10,Color.yellow),
+                Ball(380,160,10,Color.yellow),
+
+                Ball(420,100,10,Color.yellow),
+                Ball(420,120,10,Color.yellow),
+                Ball(420,140,10,Color.yellow),
+                Ball(420,160,10,Color.yellow),
+                Ball(440,120,10,Color.yellow),
+                Ball(460,100,10,Color.yellow),
+                Ball(460,140,10,Color.yellow),
+                Ball(460,160,10,Color.yellow),
+
+                Ball(260,200,10,Color.purple),
+                Ball(260,220,10,Color.purple),
+                Ball(260,240,10,Color.purple),
+                Ball(260,260,10,Color.purple),
+                Ball(280,260,10,Color.purple),
+                Ball(300,200,10,Color.purple),
+                Ball(300,220,10,Color.purple),
+                Ball(300,240,10,Color.purple),
+                Ball(300,260,10,Color.purple),
+            ]
             self.lvlTxt = [
-                ["Thanks a lot for playing!!!",WIDTH/2,HEIGHT/2,30]
+                ["Thanks a lot for playing!!!",WIDTH/2,HEIGHT/2,30],
             ]
         self.currentLevel = num
     def showLevel(self):
@@ -459,6 +538,8 @@ class GameScreen:
             for forceArea in self.forceAreas:
                 forceArea.show()
                 self.player.contactForceArea(forceArea)
+                for ball in self.balls:
+                    ball.contactForceArea(forceArea)
             for text in self.lvlTxt:
                 renderText(text[0],text[1],text[2],fontSize=text[3])
             for block in self.blocks:
@@ -469,6 +550,12 @@ class GameScreen:
                 wallBlock.show()
             self.hole.show()
             self.hole.update()
+            for ball in self.balls:
+                self.player.contactBall(ball)
+                ball.show()
+                ball.update()
+                for ball2 in self.balls:
+                    ball.contactBall(ball2)
             self.player.show()
             self.player.update()
             if (self.player.detectHole(self.hole)):
@@ -484,20 +571,29 @@ class GameScreen:
             if self.currentLevel==2 or self.currentLevel==7:
                 renderText("Par "+str(self.par),40,20,fontSize=16)
                 renderText("Strokes: "+str(self.strokes),60,36,fontSize=16)
+                renderText("Pause - Esc / P",80,110,fontSize=16)
+                Button(60,70,40,20,Color.black,Color.yellow,Color.blue,Color.white,"Reset",screen="level"+str(self.currentLevel)).show()
+            elif self.currentLevel==9:
+                renderText("Par "+str(self.par),WIDTH-100,90,fontSize=16)
+                renderText("Strokes: "+str(self.strokes),WIDTH-120,106,fontSize=16)
+                renderText("Pause - Esc / P",WIDTH-140,180,fontSize=16)
+                Button(WIDTH-120,140,40,20,Color.black,Color.yellow,Color.blue,Color.white,"Reset",screen="level"+str(self.currentLevel)).show()
             else:
                 renderText("Par "+str(self.par),WIDTH-40,20,fontSize=16)
                 renderText("Strokes: "+str(self.strokes),WIDTH-60,36,fontSize=16)
+                renderText("Pause - Esc / P",WIDTH-80,110,fontSize=16)
+                Button(WIDTH-60,70,40,20,Color.black,Color.yellow,Color.blue,Color.white,"Reset",screen="level"+str(self.currentLevel)).show()
         else:
             pg.draw.rect(frame,Color.purple,(0,0,WIDTH,HEIGHT))
             renderText("Paused",WIDTH/2,HEIGHT/3,fontSize=40)
-            renderText("Press 'Esc' to resume game!",WIDTH/2,HEIGHT/2.5,fontSize=20)
+            renderText("Press 'Esc' or 'P' to resume game!",WIDTH/2,HEIGHT/2.5,fontSize=20)
             Button(WIDTH/2,HEIGHT/2,100,25,Color.orange,Color.yellow,Color.blue,Color.white,"Restart Game",screen="level"+str(self.currentLevel)).show()
             Button(WIDTH/2,HEIGHT/2+75,100,25,Color.orange,Color.yellow,Color.blue,Color.white,"Exit Game",screen="levels").show()
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
             elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_ESCAPE:
+                if event.key == pg.K_ESCAPE or event.key == pg.K_p:
                     self.paused = not self.paused
             elif event.type == pg.MOUSEBUTTONUP:
                 self.strokes+=1
@@ -541,7 +637,8 @@ class GameScreen:
             renderText("Score: "+"±"+str(score),WIDTH/2,HEIGHT/2,fontSize=30)
         else:
             renderText("Score: "+str(score),WIDTH/2,HEIGHT/2,fontSize=30)
-        Button(WIDTH/2,HEIGHT/1.6,100,30,Color.orange,Color.green,Color.yellow,Color.white,"Next Level!","level"+str(self.currentLevel+1)).show()
+        if self.currentLevel<10:
+            Button(WIDTH/2,HEIGHT/1.6,100,30,Color.orange,Color.green,Color.yellow,Color.white,"Next Level!","level"+str(self.currentLevel+1)).show()
         Button(WIDTH/2,HEIGHT/1.3,100,30,Color.orange,Color.green,Color.yellow,Color.white,"Go back!","levels").show()
 
 gameScreen = GameScreen()
