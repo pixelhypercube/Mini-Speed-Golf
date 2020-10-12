@@ -1,7 +1,7 @@
 # PHC-Minigolf
 A mini golf game made using pygame!
 
-One of my first successful programs I've made using pygame!
+One of my first successful programs I've made using pygame! 😃
 
 ---
 ## How to play:
