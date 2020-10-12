@@ -13,6 +13,14 @@ One of my first successful programs I've made using pygame!
 | Left Click | Adjust strength (press), Hit ball (release) |
 | Esc / P | Pause / Resume game |
 ---
+## Download:
+#### Link : https://github.com/pixelhypercube/PHC-Minigolf/releases/download/1.0beta/PHC-Minigolf-1.0beta.zip
+### How to run the program:
+1. Extract the zip file by double clicking on it
+2. Double click on game.exe and start playing!!!
+- P.S. unfortunately, game.exe wouldn't work if it's in other directories :(
+
+---
 
 ## Game Demo
 ![](./demoImg.gif)
