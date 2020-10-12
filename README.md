@@ -18,8 +18,9 @@ One of my first successful programs I've made using pygame!
 ### How to run the program:
 1. Extract the zip file by double clicking on it
 2. Double click on game.exe and start playing!!!
-- P.S. unfortunately, game.exe wouldn't work if it's in other directories :(
 
+- Unfortunately, game.exe wouldn't work if it's in other directories :( (may try to fix in a next update)
+- The buttons may not work 100% correctly - holding down the buttons for a while may do the trick (hopefully...) 🤞
 ---
 
 ## Game Demo
