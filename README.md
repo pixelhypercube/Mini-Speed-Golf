@@ -1,11 +1,13 @@
-# PHC-Minigolf
+# Mini-Speed-Golf
 A mini golf game made using pygame!
+However, you can choose to hit the ball when it's moving at any speed, even when it's faster than Sonic!
 
 One of my first successful programs I've made using pygame! 😃
 
 ---
 ## How to play:
 #### Just like golf, get the ball into the hole with the least number of shots possible!
+#### You can also choose to complete the game as fast as possible! (aka speedrunning haha 😂)
 
 ### Controls (in-game)
 | Key  | Function |
@@ -14,14 +16,13 @@ One of my first successful programs I've made using pygame! 😃
 | Esc / P | Pause / Resume game |
 ---
 ## Download:
-#### Link : https://github.com/pixelhypercube/PHC-Minigolf/releases/download/1.0beta/PHC-Minigolf-1.0beta.zip
+#### Link (latest) : https://github.com/pixelhypercube/Mini-Speed-Golf/releases/download/1.0beta/Mini-Speed-Golf-1.0beta.zip
 ### How to run the program:
 1. Extract the zip file by double clicking on it
 2. Double click on game.exe and start playing!!!
 
 - Unfortunately, game.exe wouldn't work if it's in other directories :( (may try to fix in a next update)
-- The buttons may not work 100% correctly - holding down the buttons for a while may do the trick (hopefully...) 🤞
 ---
 
-## Game Demo
+## Game Demo (will update soon!)
 ![](./demoImg.gif)
