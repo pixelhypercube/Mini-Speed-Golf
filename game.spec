@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['game.py'],
-             pathex=['C:\\Users\\6thet\\Documents\\GIT-PROJECTS\\Python\\PHC-Minigolf'],
+             pathex=['C:\\Users\\6thet\\Documents\\GIT-THINGS\\PHC-Minigolf'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -15,7 +15,6 @@ a = Analysis(['game.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
-a.datas += [('Montserrat-Regular.ttf','C:\\Users\\6thet\\Documents\\GIT-PROJECTS\\Python\\PHC-Minigolf\\assets\\fonts\\Montserrat-Regular.ttf','DATA')]
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
@@ -31,4 +30,4 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False )
+          console=True )

@@ -30,14 +30,22 @@ mouseX = pg.mouse.get_pos()[0]
 mouseY = pg.mouse.get_pos()[1]
 mouseIsDown = pg.mouse.get_pressed()[0] == 1
 
-pg.display.set_caption("PHCGolf")
+pg.display.set_caption("Mini Speed Golf")
 
 def renderText(content,posX,posY,fontSize=20):
-    font = pg.font.Font("./assets/fonts/Montserrat-Regular.ttf",fontSize)
+    font = pg.font.Font("./assets/fonts/VarelaRound-Regular.ttf",fontSize)
     text = font.render(content,True,[255,255,255])
     textRect = text.get_rect()
     textRect.center = (posX,posY)
     frame.blit(text,textRect)
+
+def renderImage(path,posX,posY,size=None):
+    image = pg.image.load(path)
+    if size is not None:
+        image = pg.transform.scale(image,(size[0]*2,size[1]*2))
+    imageRect = image.get_rect()
+    imageRect.center = (posX,posY)
+    frame.blit(image,imageRect)
 
 
 # Classes
@@ -205,7 +213,7 @@ class Button:
             self.function()
         for i in range(1,11):
             if (self.screen=="level"+str(i)):
-                gameScreen.setLevel(i)
+                gameScreen.set_level(i)
     def setVisibility(self,visible):
         self.visible = visible
     def show(self):
@@ -229,10 +237,22 @@ class Button:
                 #     self.onHover()
             else:
                 self.onDefault()
+    def detect_mouseover(self,x,y):
+        return x>=self.x-self.w and x<=self.x+self.w and y>=self.y-self.h and y<=self.y+self.h
+    def click(self,event):
+        global mouseIsDown
+        global mouseX
+        global mouseY
+        if event.type==pg.MOUSEBUTTONDOWN:
+            if self.detect_mouseover(mouseX,mouseY):
+                self.currentColor = self.clickedColor
+        elif event.type==pg.MOUSEBUTTONUP:
+            if self.detect_mouseover(mouseX,mouseY):
+                self.onClick()
 
 class GameScreen:
     def __init__(self):
-        self.playBtn = Button(WIDTH/2,HEIGHT/2,100,25,Color.blue,Color.orange,Color.white,Color.grey,"Start Game!","levels")
+        self.playBtn = Button(WIDTH/2,HEIGHT/1.5,100,25,Color.blue,Color.orange,Color.white,Color.grey,"Start Game!","levels")
         self.backBtn = Button(80,HEIGHT/5,50,25,Color.blue,Color.orange,Color.white,Color.grey,"Back","home")
         self.lvlNumBtns = []
         self.blocks = []
@@ -255,22 +275,41 @@ class GameScreen:
         self.par = 0
         self.currentLevel = 0
         self.paused = False
+
+        # Enable speedrun timer
+        self.speedrun = False
+        self.speedrunBtn = Button(175,500,150,20,Color.orange,Color.yellow,Color.blue,Color.white,"Enable speedrun timer: "+("ON" if self.speedrun else "OFF"),function=self.toggleSpeedrunBtn())
+
+        self.resetBtn = Button(60,70,40,20,Color.black,Color.yellow,Color.blue,Color.white,"Reset",screen="level"+str(self.currentLevel))
+        self.restartBtn = Button(WIDTH/2,HEIGHT/2,100,25,Color.orange,Color.yellow,Color.blue,Color.white,"Restart Game",screen="level"+str(self.currentLevel))
+        self.exitBtn = Button(WIDTH/2,HEIGHT/2+75,100,25,Color.orange,Color.yellow,Color.blue,Color.white,"Exit Game",screen="levels")
+
+        self.nextLevelBtn = Button(WIDTH/2,HEIGHT/1.6,100,30,Color.orange,Color.green,Color.yellow,Color.white,"Next Level!","level"+str(self.currentLevel+1))
+        self.prevLevelBtn = Button(WIDTH/2,HEIGHT/1.3,100,30,Color.orange,Color.green,Color.yellow,Color.white,"Go back!","levels")
+
+    def toggleSpeedrunBtn(self):
+        self.speedrun = not self.speedrun
+
     def showHome(self):
         pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
-        renderText("PHCGolf",WIDTH/2,HEIGHT/4,fontSize=40)
-        renderText("By PixelHyperCube!",WIDTH/2,HEIGHT/3,fontSize=24)
-        renderText("Made using pygame!",WIDTH/2,HEIGHT/2.6,fontSize=15)
+        renderImage("./assets/img/logo.png",WIDTH/2,HEIGHT/3)
+        # renderText("Mini Speed Golf",WIDTH/2,HEIGHT/4,fontSize=40)
+        # renderText("Minigolf with billiard-like physics!",WIDTH/2,HEIGHT/3.2,fontSize=20)
+        # renderText("By PixelHyperCube!",WIDTH/2,HEIGHT/2.5,fontSize=24)
+        # renderText("Made using pygame!",WIDTH/2,HEIGHT/2,fontSize=15)
         self.playBtn.show()
     def showLevelScreen(self):
         pg.draw.rect(frame,Color.green,(0,0,WIDTH,HEIGHT))
         renderText("Choose a level!",WIDTH/2,HEIGHT/5,fontSize=40)
-        renderText("Left-click the mouse and drag to adjust strength",WIDTH/2,180,fontSize=15)
-        renderText("Then release it to hit the ball!",WIDTH/2,200,fontSize=15)
-        renderText("Press 'Esc' or 'P' to pause",WIDTH/2,220,fontSize=15)
+        renderText("Left-click the mouse and drag to adjust strength",WIDTH/2,180,fontSize=18)
+        renderText("Then release it to hit the ball!",WIDTH/2,200,fontSize=18)
+        renderText("Press 'Esc' or 'P' to pause",WIDTH/2,220,fontSize=18)
+        
+        # self.speedrunBtn.show()
         self.backBtn.show()
         for btn in self.lvlNumBtns:
             btn.show()
-    def setLevel(self,num):
+    def set_level(self,num):
         self.paused = False
         self.strokes = 0
         self.balls = []
@@ -282,7 +321,7 @@ class GameScreen:
             self.player = Ball(100,HEIGHT/2,7,Color.white)
             self.hole = Hole(550,250,15,Color.black)
             self.forceAreas = []
-            self.par = 3
+            self.par = 4
             self.lvlTxt = [
                 ["Left-click the mouse and drag to adjust strength",WIDTH/2,225,20],
                 ["Then release it to hit the ball!",WIDTH/2,275,20],
@@ -336,7 +375,7 @@ class GameScreen:
             self.player = Ball(125,HEIGHT-150,7,Color.white)
             self.hole = Hole(WIDTH/2,HEIGHT/2,15,Color.black)
             self.forceAreas = []
-            self.par = 6
+            self.par = 8
             self.lvlTxt = [
                 ["Escape the spiral!",WIDTH/2,125,20]
             ]
@@ -572,23 +611,27 @@ class GameScreen:
                 renderText("Par "+str(self.par),40,20,fontSize=16)
                 renderText("Strokes: "+str(self.strokes),60,36,fontSize=16)
                 renderText("Pause - Esc / P",80,110,fontSize=16)
-                Button(60,70,40,20,Color.black,Color.yellow,Color.blue,Color.white,"Reset",screen="level"+str(self.currentLevel)).show()
+                self.resetBtn = Button(60,70,40,20,Color.black,Color.yellow,Color.blue,Color.white,"Reset",screen="level"+str(self.currentLevel))
+                self.resetBtn.show()
             elif self.currentLevel==9:
                 renderText("Par "+str(self.par),WIDTH-100,90,fontSize=16)
                 renderText("Strokes: "+str(self.strokes),WIDTH-120,106,fontSize=16)
                 renderText("Pause - Esc / P",WIDTH-140,180,fontSize=16)
-                Button(WIDTH-120,140,40,20,Color.black,Color.yellow,Color.blue,Color.white,"Reset",screen="level"+str(self.currentLevel)).show()
+                self.resetBtn = Button(WIDTH-120,140,40,20,Color.black,Color.yellow,Color.blue,Color.white,"Reset",screen="level"+str(self.currentLevel))
+                self.resetBtn.show()
             else:
                 renderText("Par "+str(self.par),WIDTH-40,20,fontSize=16)
                 renderText("Strokes: "+str(self.strokes),WIDTH-60,36,fontSize=16)
                 renderText("Pause - Esc / P",WIDTH-80,110,fontSize=16)
-                Button(WIDTH-60,70,40,20,Color.black,Color.yellow,Color.blue,Color.white,"Reset",screen="level"+str(self.currentLevel)).show()
+                self.resetBtn = Button(WIDTH-60,70,40,20,Color.black,Color.yellow,Color.blue,Color.white,"Reset",screen="level"+str(self.currentLevel))
+                self.resetBtn.show()
         else:
             pg.draw.rect(frame,Color.purple,(0,0,WIDTH,HEIGHT))
             renderText("Paused",WIDTH/2,HEIGHT/3,fontSize=40)
             renderText("Press 'Esc' or 'P' to resume game!",WIDTH/2,HEIGHT/2.5,fontSize=20)
-            Button(WIDTH/2,HEIGHT/2,100,25,Color.orange,Color.yellow,Color.blue,Color.white,"Restart Game",screen="level"+str(self.currentLevel)).show()
-            Button(WIDTH/2,HEIGHT/2+75,100,25,Color.orange,Color.yellow,Color.blue,Color.white,"Exit Game",screen="levels").show()
+            self.restartBtn.screen = "level"+str(self.currentLevel)
+            self.restartBtn.show()
+            self.exitBtn.show()
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
@@ -638,8 +681,10 @@ class GameScreen:
         else:
             renderText("Score: "+str(score),WIDTH/2,HEIGHT/2,fontSize=30)
         if self.currentLevel<10:
-            Button(WIDTH/2,HEIGHT/1.6,100,30,Color.orange,Color.green,Color.yellow,Color.white,"Next Level!","level"+str(self.currentLevel+1)).show()
-        Button(WIDTH/2,HEIGHT/1.3,100,30,Color.orange,Color.green,Color.yellow,Color.white,"Go back!","levels").show()
+            # Next Level Btn
+            self.nextLevelBtn.show()
+        # Prev Level Btn
+        self.prevLevelBtn.show()
 
 gameScreen = GameScreen()
 
@@ -662,6 +707,26 @@ while running:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
+
+        if (type(gameScreen).__name__=="GameScreen"):
+            if currentScreen=="home":
+                gameScreen.playBtn.click(event)
+            if currentScreen=="levels":
+                gameScreen.backBtn.click(event)
+                for lvlBtn in gameScreen.lvlNumBtns:
+                    lvlBtn.click(event)
+            if currentScreen=="scored":
+                gameScreen.prevLevelBtn.click(event)
+                gameScreen.backBtn.click(event)
+
+            # Levels events
+
+            for i in range(1,11):
+                if (currentScreen=="level"+str(i)):
+                    gameScreen.restartBtn.click(event)
+                    gameScreen.resetBtn.click(event)
+            # if currentScreen=="scored":
+            #     gameScreen
         elif event.type == pg.MOUSEBUTTONDOWN:
             print("mouse is down")
         elif event.type == pg.MOUSEBUTTONUP:
