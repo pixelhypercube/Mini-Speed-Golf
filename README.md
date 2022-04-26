@@ -1,13 +1,13 @@
 # Mini-Speed-Golf
 A mini golf game made using pygame!
-However, you can choose to hit the ball when it's moving at any speed, even when it's faster than Sonic!
+However, you can choose to hit the ball when it's moving at any speed, even when it's faster than Sonic the Hedgehog!
 
 One of my first successful programs I've made using pygame! 😃
 
 ---
 ## How to play:
 #### Just like golf, get the ball into the hole with the least number of shots possible!
-#### You can also choose to complete the game as fast as possible! (aka speedrunning haha 😂)
+#### You can also choose to complete the game as fast as possible! (aka speedrunning 😂)
 
 ### Controls (in-game)
 | Key  | Function |
