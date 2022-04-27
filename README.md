@@ -16,7 +16,7 @@ One of my first successful programs I've made using pygame! 😃
 | Esc / P | Pause / Resume game |
 ---
 ## Download:
-#### Link (latest) : https://github.com/pixelhypercube/Mini-Speed-Golf/releases/download/1.0beta/Mini-Speed-Golf-1.0beta.zip
+#### Link (latest) : https://github.com/pixelhypercube/Mini-Speed-Golf/releases/download/1.1.1beta/Mini-Speed-Golf-1.1.1beta.zip
 ### How to run the program:
 1. Extract the zip file by double clicking on it
 2. Double click on game.exe and start playing!!!
