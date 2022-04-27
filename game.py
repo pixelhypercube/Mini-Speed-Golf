@@ -12,14 +12,15 @@ frameCount = 0
 class Color:
     white = (255,255,255)
     grey = (127,127,127)
-    red = (255,40,0)
+    red = (219, 80, 74)
     yellow = (200,210,0)
-    orange = (185,105,0)
-    green = (0,127,50)
-    blue = (0,50,255)
+    orange = (227, 181, 5)
+    green = (27, 133, 67)
+    blue = (8, 76, 97)
     purple = (150,30,255)
     black = (0,0,0)
-    light_blue = (0,125,255)
+    light_blue = (79, 109, 122)
+    bright_blue = (86, 149, 204)
 
 # The game
 pg.init()
@@ -219,8 +220,8 @@ class Button:
     def show(self):
         self.setVisibility(True)
         if self.visible==True:
-            pg.draw.rect(frame,Color.black,(self.x-self.w-3,self.y-self.h-3,self.w*2+6,self.h*2+6))
-            pg.draw.rect(frame,self.currentColor,(self.x-self.w,self.y-self.h,self.w*2,self.h*2))
+            pg.draw.rect(frame,Color.black,pg.Rect(self.x-self.w-3,self.y-self.h-3,self.w*2+6,self.h*2+6))
+            pg.draw.rect(frame,self.currentColor,pg.Rect(self.x-self.w,self.y-self.h,self.w*2,self.h*2))
             renderText(self.content,self.x,self.y)
             if (mouseX>=self.x-self.w and mouseX<=self.x+self.w
             and mouseY>=self.y-self.h and mouseY<=self.y+self.h):
@@ -252,8 +253,8 @@ class Button:
 
 class GameScreen:
     def __init__(self):
-        self.playBtn = Button(WIDTH/2,HEIGHT/1.5,100,25,Color.blue,Color.orange,Color.white,Color.grey,"Start Game!","levels")
-        self.backBtn = Button(80,HEIGHT/5,50,25,Color.blue,Color.orange,Color.white,Color.grey,"Back","home")
+        self.playBtn = Button(WIDTH/2,HEIGHT/1.5,100,25,Color.blue,Color.light_blue,Color.bright_blue,Color.grey,"Start Game!","levels")
+        self.backBtn = Button(80,HEIGHT/5,50,25,Color.blue,Color.light_blue,Color.bright_blue,Color.grey,"Back","home")
         self.lvlNumBtns = []
         self.blocks = []
         self.wallBlocks = [
@@ -265,9 +266,9 @@ class GameScreen:
         self.forceAreas = []
         self.balls = []
         for i in range(1,6):
-            self.lvlNumBtns.append(Button(i*100,(HEIGHT/2),30,30,Color.blue,Color.orange,Color.white,Color.grey,str(i),"level"+str(i)))
+            self.lvlNumBtns.append(Button(i*100,(HEIGHT/2),30,30,Color.blue,Color.light_blue,Color.bright_blue,Color.grey,str(i),"level"+str(i)))
         for i in range(6,11):
-            self.lvlNumBtns.append(Button((i-5)*100,(HEIGHT/2)+100,30,30,Color.blue,Color.orange,Color.white,Color.grey,str(i),"level"+str(i)))
+            self.lvlNumBtns.append(Button((i-5)*100,(HEIGHT/2)+100,30,30,Color.blue,Color.light_blue,Color.bright_blue,Color.grey,str(i),"level"+str(i)))
         self.player = Ball(50,HEIGHT/2,10,Color.white)
         self.hole = Hole(550,250,15,Color.black)
         self.lvlTxt = []
@@ -281,11 +282,11 @@ class GameScreen:
         self.speedrunBtn = Button(175,500,150,20,Color.orange,Color.yellow,Color.blue,Color.white,"Enable speedrun timer: "+("ON" if self.speedrun else "OFF"),function=self.toggleSpeedrunBtn())
 
         self.resetBtn = Button(60,70,40,20,Color.black,Color.yellow,Color.blue,Color.white,"Reset",screen="level"+str(self.currentLevel))
-        self.restartBtn = Button(WIDTH/2,HEIGHT/2,100,25,Color.orange,Color.yellow,Color.blue,Color.white,"Restart Game",screen="level"+str(self.currentLevel))
-        self.exitBtn = Button(WIDTH/2,HEIGHT/2+75,100,25,Color.orange,Color.yellow,Color.blue,Color.white,"Exit Game",screen="levels")
+        self.restartBtn = Button(WIDTH/2,HEIGHT/2,100,25,Color.blue,Color.light_blue,Color.bright_blue,Color.grey,"Restart Game",screen="level"+str(self.currentLevel))
+        self.exitBtn = Button(WIDTH/2,HEIGHT/2+75,100,25,Color.blue,Color.light_blue,Color.bright_blue,Color.grey,"Exit Game",screen="levels")
 
-        self.nextLevelBtn = Button(WIDTH/2,HEIGHT/1.6,100,30,Color.orange,Color.green,Color.yellow,Color.white,"Next Level!","level"+str(self.currentLevel+1))
-        self.prevLevelBtn = Button(WIDTH/2,HEIGHT/1.3,100,30,Color.orange,Color.green,Color.yellow,Color.white,"Go back!","levels")
+        self.nextLevelBtn = Button(WIDTH/2,HEIGHT/1.6,100,30,Color.orange,Color.yellow,Color.bright_blue,Color.white,"Next Level!","level"+str(self.currentLevel+1))
+        self.prevLevelBtn = Button(WIDTH/2,HEIGHT/1.3,100,30,Color.orange,Color.yellow,Color.bright_blue,Color.white,"Go back!","levels")
 
     def toggleSpeedrunBtn(self):
         self.speedrun = not self.speedrun
@@ -324,8 +325,10 @@ class GameScreen:
             self.par = 4
             self.lvlTxt = [
                 ["Left-click the mouse and drag to adjust strength",WIDTH/2,225,20],
-                ["Then release it to hit the ball!",WIDTH/2,275,20],
-                ["Press 'Esc' or 'P' to pause",WIDTH/2,325,20],
+                ["Then release it to hit the ball!",WIDTH/2,250,20],
+                ["Press 'Esc' or 'P' to pause",WIDTH/2,275,20],
+                ["Unlike traditional golf, you can hit the ball while it's moving!",WIDTH/2,335,12],
+                ["So that means, you can hit the ball many times quickly :)",WIDTH/2,350,12],
             ]
         elif num==2:
             self.blocks = [
@@ -683,6 +686,7 @@ class GameScreen:
         if self.currentLevel<10:
             # Next Level Btn
             self.nextLevelBtn.show()
+            self.nextLevelBtn.screen = "level" + str(self.currentLevel+1)
         # Prev Level Btn
         self.prevLevelBtn.show()
 
